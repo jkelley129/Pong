@@ -23,7 +23,7 @@ int main() {
     player.setPosition(Vector2<float>(20,WINDOW_HEIGHT/2));
 
     RectangleShape opponent(Vector2<float>(20, 100));
-    opponent.setPosition(Vector2<float>(WINDOW_WIDTH - 20,WINDOW_HEIGHT/2));
+    opponent.setPosition(Vector2<float>(WINDOW_WIDTH - 200,WINDOW_HEIGHT/2));
 
     CircleShape ball(15);
     ball.setPosition(Vector2<float>(WINDOW_WIDTH/2,WINDOW_HEIGHT/2));
@@ -57,6 +57,7 @@ int main() {
         // Handle collisions
         if(ballCollision != std::nullopt){
             bmove.x *= -1;
+            if(playerCollide != std::nullopt){bmove.x = BALL_SPEED;}
         }else if(ball.getPosition().y <= 0 || ball.getPosition().y >= WINDOW_HEIGHT - 50){
             bmove.y *= -1;
         }else if(ball.getPosition().x <= -10){
@@ -82,7 +83,7 @@ int main() {
         window.draw(player);
 
         //Set the opponents position to ball height(its totally fair dont worry abt it)
-        opponent.setPosition(Vector2<float>(WINDOW_WIDTH - 20, ball.getPosition().y));
+        opponent.setPosition(Vector2<float>(WINDOW_WIDTH - 50, ball.getPosition().y));
         window.draw(opponent);
 
         //Move and draw the ball
