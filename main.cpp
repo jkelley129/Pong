@@ -4,12 +4,12 @@
 #include <random>
 
 constexpr float PLAYER_SPEED = 750.0f; // pixels per second
-constexpr float BALL_SPEED = 1400.0f;   // pixels per second
+float BALL_SPEED = 1400.0f;   // pixels per second
 constexpr int WINDOW_WIDTH = 1600;
 constexpr int WINDOW_HEIGHT = 1200;
 constexpr int MIDDLE_WIDTH = WINDOW_WIDTH / 2;
 constexpr int MIDDLE_HEIGHT = WINDOW_HEIGHT / 2;
-constexpr float TARGET_FPS = 120.0f;
+constexpr float TARGET_FPS = 600.0f;
 constexpr auto TARGET_FRAME_TIME = std::chrono::duration<float>(1.0f / TARGET_FPS);
 
 float getRandomNumber(float min, float max){
@@ -28,6 +28,7 @@ float getRandomNumber(float min, float max){
 int main() {
     using namespace sf;
     bool ball_move_allowed = false;
+    bool zen_mode = false;
     const sf::Font font("arial.ttf");
     bool gameOver = false;
     int score = 0;
@@ -87,7 +88,7 @@ int main() {
 
         // Handle collisions
         if(ballCollision != std::nullopt){
-            ballVelocity.x *= -1;
+            ballVelocity.x = -BALL_SPEED;
             if(playerCollide != std::nullopt){
                 ballVelocity.x = BALL_SPEED;
             }
@@ -127,7 +128,7 @@ int main() {
         window.draw(ball);
 
         // Game over handling
-        if(gameOver && Keyboard::isKeyPressed(Keyboard::Key::R)){
+        if(Keyboard::isKeyPressed(Keyboard::Key::R)){
             player.setPosition(Vector2<float>(20, WINDOW_HEIGHT/2));
             opponent.setPosition(Vector2<float>(WINDOW_WIDTH - 200, WINDOW_HEIGHT/2));
             ball.setPosition(Vector2<float>(WINDOW_WIDTH/2, WINDOW_HEIGHT/2));
@@ -140,6 +141,15 @@ int main() {
             scoreText.setString(std::to_string(score));
             window.draw(scoreText);
         }
+
+        if(Keyboard::isKeyPressed(Keyboard::Key::Z) && !zen_mode){
+            BALL_SPEED = 3000.0f;
+            ballVelocity = {BALL_SPEED, 1500.0f};
+            zen_mode = true;
+        }else if(Keyboard::isKeyPressed(Keyboard::Key::Z) && zen_mode){
+            zen_mode = false;
+            BALL_SPEED = 1400.0f;
+        }else if(zen_mode) player.setPosition(Vector2<float>(20, ball.getPosition().y));
 
         // Display the window
         window.display();
