@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <chrono>
+#include <thread>
 
 constexpr float PLAYER_SPEED = 0.2;
 constexpr float BALL_SPEED = 0.1;
@@ -7,12 +8,13 @@ constexpr int WINDOW_WIDTH = 1600;
 constexpr int WINDOW_HEIGHT = 1200;
 constexpr int MIDDLE_WIDTH = WINDOW_WIDTH / 2;
 constexpr int MIDDLE_HEIGHT = WINDOW_HEIGHT / 2;
+constexpr int SLEEP_NANOSECONDS = 100;
 
 int main() {
     using namespace sf;
     bool ball_move_allowed = false;
-    auto start_time = std::chrono::steady_clock::now();
     const sf::Font font("arial.ttf");
+    bool gameOver = false;
     sf::Text loseGame(font, "YOU SUCK", 200);
     loseGame.setPosition(Vector2<float>(MIDDLE_WIDTH-500, MIDDLE_HEIGHT-200));
 
@@ -29,9 +31,9 @@ int main() {
     ball.setPosition(Vector2<float>(WINDOW_WIDTH/2,WINDOW_HEIGHT/2));
 
     //Player speed
-    Vector2<float> pmove = (Vector2<float>(0, 0));
+    Vector2<float> playerMove;
     //Ball speed
-    Vector2<float> bmove = (Vector2<float>(-BALL_SPEED, -BALL_SPEED/2));
+    Vector2<float> ballMove = (Vector2<float>(-BALL_SPEED, -BALL_SPEED / 2));
 
 
     // Start the game loop
@@ -56,12 +58,12 @@ int main() {
 
         // Handle collisions
         if(ballCollision != std::nullopt){
-            bmove.x *= -1;
-            if(playerCollide != std::nullopt){bmove.x = BALL_SPEED;}
+            ballMove.x *= -1;
+            if(playerCollide != std::nullopt){ ballMove.x = BALL_SPEED;}
         }else if(ball.getPosition().y <= 0 || ball.getPosition().y >= WINDOW_HEIGHT - 50){
-            bmove.y *= -1;
+            ballMove.y *= -1;
         }else if(ball.getPosition().x <= -10){
-            window.draw(loseGame);
+            gameOver = true;
             ball.setPosition(Vector2<float>(-200, WINDOW_HEIGHT/2));
         }
 
@@ -69,17 +71,17 @@ int main() {
         // Accept player input
         if (Keyboard::isKeyPressed(Keyboard::Key::W) ||
             Keyboard::isKeyPressed(Keyboard::Key::Up)) {
-            pmove = (Vector2<float>(0,-PLAYER_SPEED));
+            playerMove = (Vector2<float>(0, -PLAYER_SPEED));
             ball_move_allowed = true;
         }else if(Keyboard::isKeyPressed(Keyboard::Key::S) ||
                  Keyboard::isKeyPressed(Keyboard::Key::Down)){
-            pmove = (Vector2<float>(0,PLAYER_SPEED));
+            playerMove = (Vector2<float>(0, PLAYER_SPEED));
             ball_move_allowed = true;
         }else{
-            pmove = (Vector2<float>(0,0));
+            playerMove = (Vector2<float>(0, 0));
         }
         //Move and draw the player
-        player.move(pmove);
+        player.move(playerMove);
         window.draw(player);
 
         //Set the opponents position to ball height(its totally fair dont worry abt it)
@@ -87,11 +89,21 @@ int main() {
         window.draw(opponent);
 
         //Move and draw the ball
-        ball.move(ball_move_allowed ? bmove : Vector2<float>(0, 0));
+        ball.move(ball_move_allowed ? ballMove : Vector2<float>(0, 0));
         window.draw(ball);
+
+        if(gameOver && Keyboard::isKeyPressed(Keyboard::Key::R)){
+            player.setPosition(Vector2<float>(20,WINDOW_HEIGHT/2));
+            opponent.setPosition(Vector2<float>(WINDOW_WIDTH - 200,WINDOW_HEIGHT/2));
+            ball.setPosition(Vector2<float>(WINDOW_WIDTH/2,WINDOW_HEIGHT/2));
+            ball_move_allowed = false;
+            loseGame.setScale(Vector2f(0,0));
+        }else if(gameOver) window.draw(loseGame);
+
 
         //Display the window
         //kind of important
         window.display();
+        std::this_thread::sleep_for(std::chrono::nanoseconds(SLEEP_NANOSECONDS));
     }
 }
