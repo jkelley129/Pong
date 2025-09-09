@@ -11,6 +11,7 @@ constexpr int MIDDLE_WIDTH = WINDOW_WIDTH / 2;
 constexpr int MIDDLE_HEIGHT = WINDOW_HEIGHT / 2;
 constexpr float TARGET_FPS = 600.0f;
 constexpr auto TARGET_FRAME_TIME = std::chrono::duration<float>(1.0f / TARGET_FPS);
+constexpr float BALL_COLLISION_VARIATION = 150;
 
 float getRandomNumber(float min, float max){
     std::random_device rd;
@@ -29,6 +30,7 @@ int main() {
     using namespace sf;
     bool ball_move_allowed = false;
     bool zen_mode = false;
+    bool spawn_random_upwards;
     const sf::Font font("arial.ttf");
     bool gameOver = false;
     int score = 0;
@@ -50,7 +52,7 @@ int main() {
     ball.setPosition(Vector2<float>(WINDOW_WIDTH/2, WINDOW_HEIGHT/2));
 
     // Ball velocity in pixels per second
-    Vector2<float> ballVelocity(-BALL_SPEED, -getRandomNumber(-BALL_SPEED,BALL_SPEED) * 0.5f);
+    Vector2<float> ballVelocity(-BALL_SPEED, -getRandomNumber(-BALL_SPEED,BALL_SPEED) * 0.3f);
 
     // Delta time tracking
     auto lastTime = std::chrono::high_resolution_clock::now();
@@ -92,9 +94,23 @@ int main() {
             if(playerCollide != std::nullopt){
                 ballVelocity.x = BALL_SPEED;
             }
-        } else if(ball.getPosition().y <= 0 || ball.getPosition().y >= WINDOW_HEIGHT - 50){
-            ballVelocity.y *= -1;
-        } else if(ball.getPosition().x <= -10){
+            if(ballVelocity.y >= 0){
+                if(getRandomNumber(0,1) > 0.7){
+                    ballVelocity.y = getRandomNumber(ballVelocity.y, ballVelocity.y + BALL_COLLISION_VARIATION);
+                }
+            }else{
+                if(getRandomNumber(0,1) > 0.7){
+                    ballVelocity.y = getRandomNumber(ballVelocity.y - BALL_COLLISION_VARIATION, ballVelocity.y);
+                }
+            }
+        }
+
+        if(ball.getPosition().y <= 0){
+            ballVelocity.y = abs(ballVelocity.y);
+        }else if(ball.getPosition().y >= WINDOW_HEIGHT - 50){
+            ballVelocity.y = -abs(ballVelocity.y);
+        }
+        else if(ball.getPosition().x <= -10){
             gameOver = true;
             ball.setPosition(Vector2<float>(-200, WINDOW_HEIGHT/2));
         }
