@@ -3,7 +3,7 @@
 #include <thread>
 #include <random>
 
-constexpr float PLAYER_SPEED = 750.0f; // pixels per second
+constexpr float PLAYER_SPEED = 850.0f; // pixels per second
 float BALL_SPEED = 1400.0f;   // pixels per second
 constexpr int WINDOW_WIDTH = 1600;
 constexpr int WINDOW_HEIGHT = 1200;
@@ -30,7 +30,6 @@ int main() {
     using namespace sf;
     bool ball_move_allowed = false;
     bool zen_mode = false;
-    bool spawn_random_upwards;
     const sf::Font font("arial.ttf");
     bool gameOver = false;
     int score = 0;
@@ -95,11 +94,11 @@ int main() {
                 ballVelocity.x = BALL_SPEED;
             }
             if(ballVelocity.y >= 0){
-                if(getRandomNumber(0,1) > 0.7){
+                if(getRandomNumber(0,1) > 0.6){
                     ballVelocity.y = getRandomNumber(ballVelocity.y, ballVelocity.y + BALL_COLLISION_VARIATION);
                 }
             }else{
-                if(getRandomNumber(0,1) > 0.7){
+                if(getRandomNumber(0,1) > 0.6){
                     ballVelocity.y = getRandomNumber(ballVelocity.y - BALL_COLLISION_VARIATION, ballVelocity.y);
                 }
             }
@@ -151,7 +150,7 @@ int main() {
             ball_move_allowed = false;
             gameOver = false;
             score = 0;
-            ballVelocity = Vector2<float>(-BALL_SPEED, -getRandomNumber(-BALL_SPEED,BALL_SPEED) * 0.5f);
+            ballVelocity = Vector2<float>(-BALL_SPEED, -getRandomNumber(-BALL_SPEED,BALL_SPEED) * 0.4f);
         } else if(gameOver) {
             window.draw(loseGame);
             scoreText.setString(std::to_string(score));
